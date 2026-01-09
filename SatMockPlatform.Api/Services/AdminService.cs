@@ -78,10 +78,8 @@ public class AdminService
         var student = await _context.Users.FindAsync(id);
         if (student == null) throw new Exception("Student not found");
         
-        // Also remove related data like Exam Results
-        // This is critical to avoid FK constraints (400 Bad Request)
-        var results = _context.StudentExams.Where(se => se.StudentId == id);
-        _context.StudentExams.RemoveRange(results);
+        // Optimize deletion using ExecuteDeleteAsync (No memory loading)
+        await _context.StudentExams.Where(se => se.StudentId == id).ExecuteDeleteAsync();
         
         _context.Users.Remove(student);
         await _context.SaveChangesAsync();
