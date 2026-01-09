@@ -49,13 +49,21 @@ public class StudentService
             await _context.SaveChangesAsync();
         }
 
-        var exam = await _context.Exams
-            .Include(e => e.Questions)
-            .FirstOrDefaultAsync(e => e.Id == examId);
+        var examData = await _context.Exams
+            .Where(e => e.Id == examId)
+            .Select(e => new { 
+                e.Id, 
+                e.Title, 
+                Questions = e.Questions.Select(q => new { 
+                    q.Id, q.Section, q.Module, q.QuestionText, q.ChoicesJson 
+                }).ToList() 
+            })
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
         
-        if (exam == null) throw new Exception("Exam not found");
+        if (examData == null) throw new Exception("Exam not found");
 
-        var questions = exam.Questions.Select(q => new QuestionDto(
+        var questions = examData.Questions.Select(q => new QuestionDto(
             q.Id,
             q.Section,
             q.Module,
@@ -63,7 +71,7 @@ public class StudentService
             JsonSerializer.Deserialize<List<string>>(q.ChoicesJson) ?? new List<string>()
         )).ToList();
 
-        return new StartExamResponse(attempt.Id, new ExamDetailsDto(exam.Id, exam.Title, questions));
+        return new StartExamResponse(attempt.Id, new ExamDetailsDto(examData.Id, examData.Title, questions));
     }
 
     public async Task SubmitAnswerAsync(Guid studentExamId, SubmitAnswerRequest request)

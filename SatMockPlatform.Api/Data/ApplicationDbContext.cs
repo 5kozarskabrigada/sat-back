@@ -27,5 +27,11 @@ public class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<Question>()
             .HasIndex(q => q.ExamId); // Optimize Question retrieval by ExamId
+
+        modelBuilder.Entity<StudentExam>()
+            .HasIndex(se => se.StudentId); // Optimize finding exams for a student
+
+        modelBuilder.Entity<StudentExam>()
+            .HasIndex(se => new { se.Status, se.EndTime }); // Optimize Results audit query
     }
 }

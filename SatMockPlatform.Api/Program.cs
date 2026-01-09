@@ -66,10 +66,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
     options.UseNpgsql(connectionString, npgsqlOptions => {
         npgsqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 10,
-            maxRetryDelay: TimeSpan.FromSeconds(30),
+            maxRetryCount: 3,
+            maxRetryDelay: TimeSpan.FromSeconds(5),
             errorCodesToAdd: null);
-        npgsqlOptions.CommandTimeout(180); // Increase timeout to 180 seconds for Render free tier
+        npgsqlOptions.CommandTimeout(60); // Optimize timeout for UX
     })
     .UseSnakeCaseNamingConvention();
 });

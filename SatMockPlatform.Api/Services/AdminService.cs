@@ -10,6 +10,8 @@ public class AdminService
 {
     private readonly ApplicationDbContext _context;
 
+    private static readonly Random _rng = new Random();
+
     public AdminService(ApplicationDbContext context)
     {
         _context = context;
@@ -22,7 +24,7 @@ public class AdminService
 
         foreach (var req in requests)
         {
-            var randomSuffix = new Random().Next(1000, 9999);
+            var randomSuffix = _rng.Next(1000, 9999);
             // Ensure simple sanitization for username
             var safeFirstName = new string(req.FirstName.Where(char.IsLetter).ToArray());
             var safeLastName = new string(req.LastName.Where(char.IsLetter).ToArray());
@@ -269,6 +271,6 @@ public class AdminService
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
         return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[new Random().Next(s.Length)]).ToArray());
+            .Select(s => s[_rng.Next(s.Length)]).ToArray());
     }
 }
