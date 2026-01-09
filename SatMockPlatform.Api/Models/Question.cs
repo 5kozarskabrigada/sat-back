@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SatMockPlatform.Api.Models;
 
-[Table("Questions")]
+[Table("questions")]
 public class Question
 {
     [Key]
