@@ -5,7 +5,16 @@ using Microsoft.OpenApi.Models;
 using SatMockPlatform.Api.Data;
 using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    // Disable reload on change to prevent "inotify limit reached" on Render
+    ContentRootPath = Directory.GetCurrentDirectory() 
+});
+builder.Configuration.Sources.Clear();
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
+builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: false);
+builder.Configuration.AddEnvironmentVariables();
 
 // Add services to the container.
 
