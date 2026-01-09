@@ -51,6 +51,7 @@ public class AdminService
     public async Task<List<StudentDto>> GetStudentsAsync()
     {
         return await _context.Users
+            .AsNoTracking()
             .Where(u => u.Role == "student")
             .Select(u => new StudentDto(u.Id, u.Username, u.Role, u.CreatedAt))
             .ToListAsync();
@@ -59,16 +60,18 @@ public class AdminService
     public async Task<List<ExamDto>> GetExamsAsync()
     {
         return await _context.Exams
+            .AsNoTracking()
             .Select(e => new ExamDto(e.Id, e.Code, e.Title, e.CreatedAt))
             .ToListAsync();
     }
 
     public async Task<AdminExamDetailsDto?> GetExamDetailsAsync(Guid examId)
     {
-        var exam = await _context.Exams.FindAsync(examId);
+        var exam = await _context.Exams.AsNoTracking().FirstOrDefaultAsync(e => e.Id == examId);
         if (exam == null) return null;
 
         var questions = await _context.Questions
+            .AsNoTracking()
             .Where(q => q.ExamId == examId)
             .ToListAsync();
 
@@ -168,6 +171,7 @@ public class AdminService
     public async Task<List<ExamResultDto>> GetResultsAsync()
     {
         return await _context.StudentExams
+            .AsNoTracking()
             .Include(se => se.Student)
             .Include(se => se.Exam)
             .Where(se => se.Status == "completed")

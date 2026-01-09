@@ -70,9 +70,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
-        b => b.AllowAnyOrigin()
+        b => b.WithOrigins("http://localhost:5173", "https://sat-front-one.vercel.app")
               .AllowAnyMethod()
-              .AllowAnyHeader());
+              .AllowAnyHeader()
+              .AllowCredentials());
 });
 
 var app = builder.Build();
