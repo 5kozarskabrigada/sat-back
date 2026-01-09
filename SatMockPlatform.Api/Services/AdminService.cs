@@ -79,6 +79,7 @@ public class AdminService
         if (student == null) throw new Exception("Student not found");
         
         // Also remove related data like Exam Results
+        // This is critical to avoid FK constraints (400 Bad Request)
         var results = _context.StudentExams.Where(se => se.StudentId == id);
         _context.StudentExams.RemoveRange(results);
         
@@ -256,10 +257,12 @@ public class AdminService
             .Include(se => se.Student)
             .Include(se => se.Exam)
             .Where(se => se.Status == "completed")
+            // Explicit null checks to prevent NullReferenceException if data is inconsistent
+            .Where(se => se.Student != null && se.Exam != null) 
             .Select(se => new ExamResultDto(
                 se.Id,
-                se.Student != null ? se.Student.Username : "Unknown", 
-                se.Exam != null ? se.Exam.Title : "Unknown Exam",
+                se.Student.Username, 
+                se.Exam.Title,
                 se.Score ?? 0,
                 se.EndTime ?? DateTime.UtcNow
             ))
