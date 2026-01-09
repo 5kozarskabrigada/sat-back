@@ -36,7 +36,6 @@ public class AdminController : ControllerBase
         try { await _adminService.ToggleExamRestrictionAsync(examId, isRestricted); return Ok(); }
         catch (Exception ex) { return BadRequest(ex.Message); }
     }
-}
 
     [HttpGet("students")]
     public async Task<IActionResult> GetStudents()
