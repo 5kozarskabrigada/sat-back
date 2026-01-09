@@ -43,8 +43,17 @@ public class AdminController : ControllerBase
     [HttpGet("results")]
     public async Task<IActionResult> GetResults()
     {
-        var results = await _adminService.GetResultsAsync();
-        return Ok(results);
+        try 
+        {
+            var results = await _adminService.GetResultsAsync();
+            return Ok(results);
+        }
+        catch (Exception ex)
+        {
+            // Log error (console for now)
+            Console.WriteLine($"[Error] GetResults: {ex.Message}");
+            return StatusCode(500, new { error = "Internal Server Error", message = ex.Message });
+        }
     }
 
     [HttpPost("create-students")]
