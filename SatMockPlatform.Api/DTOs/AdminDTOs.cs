@@ -3,7 +3,7 @@ namespace SatMockPlatform.Api.DTOs;
 public record CreateStudentRequest(string FirstName, string LastName);
 public record UpdateStudentRequest(string FirstName, string LastName);
 public record StudentCredential(string Username, string Password);
-public record StudentDto(Guid Id, string FirstName, string LastName, string Username, string Role, DateTime CreatedAt);
+public record StudentDto(Guid Id, string FirstName, string LastName, string Username, string Password, string Role, DateTime CreatedAt);
 
 public record CreateExamRequest(string Code, string Title);
 public record UpdateExamRequest(string Code, string Title);

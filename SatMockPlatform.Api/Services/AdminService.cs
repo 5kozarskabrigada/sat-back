@@ -37,6 +37,7 @@ public class AdminService
                 LastName = req.LastName,
                 Username = username,
                 PasswordHash = passwordHash,
+                PlainPassword = password, // Store for visibility
                 Role = "student"
             };
 
@@ -55,7 +56,7 @@ public class AdminService
         return await _context.Users
             .AsNoTracking()
             .Where(u => u.Role == "student")
-            .Select(u => new StudentDto(u.Id, u.FirstName, u.LastName, u.Username, u.Role, u.CreatedAt))
+            .Select(u => new StudentDto(u.Id, u.FirstName, u.LastName, u.Username, u.PlainPassword, u.Role, u.CreatedAt))
             .ToListAsync();
     }
 
@@ -90,6 +91,7 @@ public class AdminService
 
         var newPassword = GenerateRandomPassword();
         student.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        student.PlainPassword = newPassword; // Update plain text too
         await _context.SaveChangesAsync();
 
         return new StudentCredential(student.Username, newPassword);
