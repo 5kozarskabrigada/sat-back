@@ -47,15 +47,23 @@ builder.Services.AddSwaggerGen(c =>
 
 // DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), npgsqlOptions => {
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    // Append KeepAlive to connection string for stability
+    if (!string.IsNullOrEmpty(connectionString) && !connectionString.Contains("KeepAlive"))
+    {
+        connectionString += ";KeepAlive=30";
+    }
+
+    options.UseNpgsql(connectionString, npgsqlOptions => {
         npgsqlOptions.EnableRetryOnFailure(
             maxRetryCount: 10,
             maxRetryDelay: TimeSpan.FromSeconds(30),
             errorCodesToAdd: null);
         npgsqlOptions.CommandTimeout(180); // Increase timeout to 180 seconds for Render free tier
-        npgsqlOptions.KeepAlive(30); // Send keepalive every 30 seconds
     })
-    .UseSnakeCaseNamingConvention());
+    .UseSnakeCaseNamingConvention();
+});
 
 // JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is missing");

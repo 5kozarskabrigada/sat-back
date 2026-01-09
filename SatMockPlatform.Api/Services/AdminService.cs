@@ -217,8 +217,8 @@ public class AdminService
             .Where(se => se.Status == "completed")
             .Select(se => new ExamResultDto(
                 se.Id,
-                se.Student.Username, // Assuming username is the name for now
-                se.Exam.Title,
+                se.Student != null ? se.Student.Username : "Unknown", 
+                se.Exam != null ? se.Exam.Title : "Unknown Exam",
                 se.Score ?? 0,
                 se.EndTime ?? DateTime.UtcNow
             ))
