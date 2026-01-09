@@ -11,6 +11,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Exam> Exams { get; set; }
     public DbSet<Question> Questions { get; set; }
     public DbSet<StudentExam> StudentExams { get; set; }
+    public DbSet<ExamAssignment> ExamAssignments { get; set; }
     public DbSet<Response> Responses { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -39,5 +40,11 @@ public class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<StudentExam>()
             .HasIndex(se => new { se.Status, se.EndTime }); // Optimize Results audit query
+
+        modelBuilder.Entity<ExamAssignment>()
+            .HasIndex(ea => ea.ExamId);
+        
+        modelBuilder.Entity<ExamAssignment>()
+            .HasIndex(ea => ea.StudentId);
     }
 }

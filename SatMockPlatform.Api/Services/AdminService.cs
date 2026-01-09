@@ -268,6 +268,53 @@ public class AdminService
             .ToListAsync();
     }
 
+    public async Task AssignExamToStudentsAsync(Guid examId, List<Guid> studentIds)
+    {
+        var exam = await _context.Exams.Include(e => e.Assignments).FirstOrDefaultAsync(e => e.Id == examId);
+        if (exam == null) throw new Exception("Exam not found");
+
+        // Set restricted mode if assignments exist
+        exam.IsRestricted = true;
+
+        // Add new assignments
+        var existingStudentIds = exam.Assignments.Select(a => a.StudentId).ToHashSet();
+        var newAssignments = studentIds
+            .Where(sid => !existingStudentIds.Contains(sid))
+            .Select(sid => new ExamAssignment { ExamId = examId, StudentId = sid })
+            .ToList();
+
+        if (newAssignments.Any())
+        {
+            _context.ExamAssignments.AddRange(newAssignments);
+        }
+
+        await _context.SaveChangesAsync();
+    }
+    
+    public async Task RemoveExamAssignmentAsync(Guid examId, Guid studentId)
+    {
+        var assignment = await _context.ExamAssignments
+            .FirstOrDefaultAsync(ea => ea.ExamId == examId && ea.StudentId == studentId);
+            
+        if (assignment != null)
+        {
+            _context.ExamAssignments.Remove(assignment);
+            await _context.SaveChangesAsync();
+        }
+        
+        // Check if any assignments remain. If not, maybe keep restricted? 
+        // Or user explicitly toggles public/private.
+        // For now, let's keep it simple.
+    }
+
+    public async Task ToggleExamRestrictionAsync(Guid examId, bool isRestricted)
+    {
+        var exam = await _context.Exams.FindAsync(examId);
+        if (exam == null) throw new Exception("Exam not found");
+        exam.IsRestricted = isRestricted;
+        await _context.SaveChangesAsync();
+    }
+
     private string GenerateRandomPassword(int length = 10)
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";

@@ -13,6 +13,8 @@ public class Exam
     public Guid? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
+    public bool IsRestricted { get; set; } = false; // If true, only assigned students can access
     
     public ICollection<Question> Questions { get; set; } = new List<Question>();
+    public ICollection<ExamAssignment> Assignments { get; set; } = new List<ExamAssignment>();
 }

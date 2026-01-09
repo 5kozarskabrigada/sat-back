@@ -17,13 +17,38 @@ public class StudentService
 
     public async Task<List<ExamSummaryDto>> GetAvailableExamsAsync(Guid studentId)
     {
-        var allExams = await _context.Exams.Where(e => e.IsActive).ToListAsync();
+        // Fetch all active exams
+        // Filter logic:
+        // 1. If IsRestricted == false -> Public to all
+        // 2. If IsRestricted == true -> Must have an assignment for this student
+        
+        var availableExamIds = await _context.Exams
+            .Where(e => e.IsActive)
+            .Select(e => new { e.Id, e.IsRestricted })
+            .ToListAsync();
+            
+        // For restricted exams, check assignments
+        var assignmentExamIds = await _context.ExamAssignments
+            .Where(ea => ea.StudentId == studentId)
+            .Select(ea => ea.ExamId)
+            .ToListAsync();
+            
+        var allowedExamIds = availableExamIds
+            .Where(e => !e.IsRestricted || assignmentExamIds.Contains(e.Id))
+            .Select(e => e.Id)
+            .ToList();
+
+        // Now fetch details for allowed exams
+        var finalExams = await _context.Exams
+            .Where(e => allowedExamIds.Contains(e.Id))
+            .ToListAsync();
+
         var studentExams = await _context.StudentExams
             .Where(se => se.StudentId == studentId)
             .ToListAsync();
 
         var result = new List<ExamSummaryDto>();
-        foreach (var exam in allExams)
+        foreach (var exam in finalExams)
         {
             var attempt = studentExams.FirstOrDefault(se => se.ExamId == exam.Id);
             var status = attempt?.Status ?? "not_started";

@@ -16,7 +16,27 @@ public class AdminController : ControllerBase
     public AdminController(AdminService adminService)
     {
         _adminService = adminService;
+        [HttpPost("exams/{examId}/assign")]
+    public async Task<IActionResult> AssignExam(Guid examId, [FromBody] List<Guid> studentIds)
+    {
+        try { await _adminService.AssignExamToStudentsAsync(examId, studentIds); return Ok(); }
+        catch (Exception ex) { return BadRequest(ex.Message); }
     }
+
+    [HttpDelete("exams/{examId}/assign/{studentId}")]
+    public async Task<IActionResult> RemoveAssignment(Guid examId, Guid studentId)
+    {
+        try { await _adminService.RemoveExamAssignmentAsync(examId, studentId); return Ok(); }
+        catch (Exception ex) { return BadRequest(ex.Message); }
+    }
+
+    [HttpPost("exams/{examId}/toggle-restriction")]
+    public async Task<IActionResult> ToggleRestriction(Guid examId, [FromBody] bool isRestricted)
+    {
+        try { await _adminService.ToggleExamRestrictionAsync(examId, isRestricted); return Ok(); }
+        catch (Exception ex) { return BadRequest(ex.Message); }
+    }
+}
 
     [HttpGet("students")]
     public async Task<IActionResult> GetStudents()
