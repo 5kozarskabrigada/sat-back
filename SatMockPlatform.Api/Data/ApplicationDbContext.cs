@@ -24,5 +24,8 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Exam>()
             .HasIndex(e => e.Code)
             .IsUnique();
+
+        modelBuilder.Entity<Question>()
+            .HasIndex(q => q.ExamId); // Optimize Question retrieval by ExamId
     }
 }
