@@ -54,6 +54,30 @@ public class AdminController : ControllerBase
         return Ok(credentials);
     }
 
+    [HttpPut("students/{id}")]
+    public async Task<IActionResult> UpdateStudent(Guid id, [FromBody] UpdateStudentRequest request)
+    {
+        try { await _adminService.UpdateStudentAsync(id, request); return Ok(); }
+        catch (Exception ex) { return BadRequest(ex.Message); }
+    }
+
+    [HttpDelete("students/{id}")]
+    public async Task<IActionResult> DeleteStudent(Guid id)
+    {
+        try { await _adminService.DeleteStudentAsync(id); return Ok(); }
+        catch (Exception ex) { return BadRequest(ex.Message); }
+    }
+
+    [HttpPost("students/{id}/reset-password")]
+    public async Task<IActionResult> ResetPassword(Guid id)
+    {
+        try { 
+            var creds = await _adminService.ResetStudentPasswordAsync(id); 
+            return Ok(creds); 
+        }
+        catch (Exception ex) { return BadRequest(ex.Message); }
+    }
+
     [HttpPost("upload-exam")]
     public async Task<IActionResult> CreateExam([FromBody] CreateExamRequest request)
     {

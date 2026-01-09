@@ -33,6 +33,8 @@ public class AdminService
 
             var user = new User
             {
+                FirstName = req.FirstName,
+                LastName = req.LastName,
                 Username = username,
                 PasswordHash = passwordHash,
                 Role = "student"
@@ -53,8 +55,44 @@ public class AdminService
         return await _context.Users
             .AsNoTracking()
             .Where(u => u.Role == "student")
-            .Select(u => new StudentDto(u.Id, u.Username, u.Role, u.CreatedAt))
+            .Select(u => new StudentDto(u.Id, u.FirstName, u.LastName, u.Username, u.Role, u.CreatedAt))
             .ToListAsync();
+    }
+
+    public async Task UpdateStudentAsync(Guid id, UpdateStudentRequest request)
+    {
+        var student = await _context.Users.FindAsync(id);
+        if (student == null) throw new Exception("Student not found");
+        
+        student.FirstName = request.FirstName;
+        student.LastName = request.LastName;
+        // Username is generally not changed to preserve login, but could be added if needed
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteStudentAsync(Guid id)
+    {
+        var student = await _context.Users.FindAsync(id);
+        if (student == null) throw new Exception("Student not found");
+        
+        // Also remove related data like Exam Results
+        var results = _context.StudentExams.Where(se => se.StudentId == id);
+        _context.StudentExams.RemoveRange(results);
+        
+        _context.Users.Remove(student);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<StudentCredential> ResetStudentPasswordAsync(Guid id)
+    {
+        var student = await _context.Users.FindAsync(id);
+        if (student == null) throw new Exception("Student not found");
+
+        var newPassword = GenerateRandomPassword();
+        student.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        await _context.SaveChangesAsync();
+
+        return new StudentCredential(student.Username, newPassword);
     }
 
     public async Task<List<ExamDto>> GetExamsAsync()
