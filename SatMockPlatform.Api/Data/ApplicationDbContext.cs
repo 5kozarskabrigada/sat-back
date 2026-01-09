@@ -20,6 +20,9 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Username)
             .IsUnique();
+        
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Role); // Optimize filtering by Role (e.g. fetching students)
 
         modelBuilder.Entity<Exam>()
             .HasIndex(e => e.Code)
