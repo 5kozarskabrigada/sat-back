@@ -10,6 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+}); // Enable GZIP compression
 builder.Services.AddScoped<SatMockPlatform.Api.Services.AuthService>();
 builder.Services.AddScoped<SatMockPlatform.Api.Services.AdminService>();
 builder.Services.AddScoped<SatMockPlatform.Api.Services.StudentService>();
@@ -49,6 +53,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
             maxRetryDelay: TimeSpan.FromSeconds(30),
             errorCodesToAdd: null);
         npgsqlOptions.CommandTimeout(180); // Increase timeout to 180 seconds for Render free tier
+        npgsqlOptions.KeepAlive(30); // Send keepalive every 30 seconds
     })
     .UseSnakeCaseNamingConvention());
 
@@ -95,6 +100,8 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+
+app.UseResponseCompression(); // Use compression
 
 app.UseCors("AllowAll");
 
