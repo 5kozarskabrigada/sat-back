@@ -77,6 +77,11 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// TEMPORARY: Generate Hash on Startup for debugging
+var tempPass = "admin123";
+var tempHash = BCrypt.Net.BCrypt.HashPassword(tempPass);
+Console.WriteLine($"[DEBUG] Generated Hash for '{tempPass}': {tempHash}");
+
 // Configure the HTTP request pipeline.
 // Allow Swagger in Production for easy testing if needed, or keep strictly Development.
 app.UseSwagger();
