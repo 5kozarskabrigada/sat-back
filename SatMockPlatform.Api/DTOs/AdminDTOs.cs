@@ -2,8 +2,24 @@ namespace SatMockPlatform.Api.DTOs;
 
 public record CreateStudentRequest(string FirstName, string LastName);
 public record StudentCredential(string Username, string Password);
+public record StudentDto(Guid Id, string Username, string Role, DateTime CreatedAt);
 
 public record CreateExamRequest(string Code, string Title);
+public record UpdateExamRequest(string Code, string Title);
+public record ExamDto(Guid Id, string Code, string Title, DateTime CreatedAt);
+public record AdminExamDetailsDto(Guid Id, string Code, string Title, List<AdminQuestionDto> Questions);
+
+public record AdminQuestionDto(
+    Guid Id, 
+    string Section, 
+    int Module, 
+    string QuestionText, 
+    List<string> Choices, 
+    string CorrectAnswer,
+    string? Explanation,
+    string? Difficulty
+);
+
 public record CreateQuestionRequest(
     string Section, 
     int Module, 
@@ -12,4 +28,22 @@ public record CreateQuestionRequest(
     string CorrectAnswer,
     string? Explanation,
     string? Difficulty
+);
+
+public record UpdateQuestionRequest(
+    string Section, 
+    int Module, 
+    string QuestionText, 
+    List<string> Choices, 
+    string CorrectAnswer,
+    string? Explanation,
+    string? Difficulty
+);
+
+public record ExamResultDto(
+    Guid StudentExamId,
+    string StudentName,
+    string ExamTitle,
+    int Score,
+    DateTime CompletedAt
 );

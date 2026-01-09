@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SatMockPlatform.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+733de625d853fe7344ecbd39ae29d9e7af1d456d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+14aa9360d1d1baddfe5a19c41078a31bd5fa8746")]
 [assembly: System.Reflection.AssemblyProductAttribute("SatMockPlatform.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SatMockPlatform.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

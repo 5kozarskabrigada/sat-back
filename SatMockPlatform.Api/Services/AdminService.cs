@@ -48,6 +48,44 @@ public class AdminService
         return credentials;
     }
 
+    public async Task<List<StudentDto>> GetStudentsAsync()
+    {
+        return await _context.Users
+            .Where(u => u.Role == "student")
+            .Select(u => new StudentDto(u.Id, u.Username, u.Role, u.CreatedAt))
+            .ToListAsync();
+    }
+
+    public async Task<List<ExamDto>> GetExamsAsync()
+    {
+        return await _context.Exams
+            .Select(e => new ExamDto(e.Id, e.Code, e.Title, e.CreatedAt))
+            .ToListAsync();
+    }
+
+    public async Task<AdminExamDetailsDto?> GetExamDetailsAsync(Guid examId)
+    {
+        var exam = await _context.Exams.FindAsync(examId);
+        if (exam == null) return null;
+
+        var questions = await _context.Questions
+            .Where(q => q.ExamId == examId)
+            .ToListAsync();
+
+        var questionDtos = questions.Select(q => new AdminQuestionDto(
+            q.Id,
+            q.Section,
+            q.Module,
+            q.QuestionText,
+            JsonSerializer.Deserialize<List<string>>(q.ChoicesJson) ?? new List<string>(),
+            q.CorrectAnswer,
+            q.Explanation,
+            q.Difficulty
+        )).ToList();
+
+        return new AdminExamDetailsDto(exam.Id, exam.Code, exam.Title, questionDtos);
+    }
+
     public async Task<Exam> CreateExamAsync(CreateExamRequest request, Guid adminId)
     {
         var exam = new Exam
@@ -60,6 +98,25 @@ public class AdminService
         _context.Exams.Add(exam);
         await _context.SaveChangesAsync();
         return exam;
+    }
+
+    public async Task UpdateExamAsync(Guid examId, UpdateExamRequest request)
+    {
+        var exam = await _context.Exams.FindAsync(examId);
+        if (exam == null) throw new Exception("Exam not found");
+
+        exam.Code = request.Code;
+        exam.Title = request.Title;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteExamAsync(Guid examId)
+    {
+        var exam = await _context.Exams.FindAsync(examId);
+        if (exam == null) throw new Exception("Exam not found");
+
+        _context.Exams.Remove(exam);
+        await _context.SaveChangesAsync();
     }
 
     public async Task AddQuestionsAsync(Guid examId, List<CreateQuestionRequest> questions)
@@ -81,6 +138,48 @@ public class AdminService
 
         _context.Questions.AddRange(questionEntities);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateQuestionAsync(Guid questionId, UpdateQuestionRequest request)
+    {
+        var q = await _context.Questions.FindAsync(questionId);
+        if (q == null) throw new Exception("Question not found");
+
+        q.Section = request.Section;
+        q.Module = request.Module;
+        q.QuestionText = request.QuestionText;
+        q.ChoicesJson = JsonSerializer.Serialize(request.Choices);
+        q.CorrectAnswer = request.CorrectAnswer;
+        q.Explanation = request.Explanation;
+        q.Difficulty = request.Difficulty;
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteQuestionAsync(Guid questionId)
+    {
+        var q = await _context.Questions.FindAsync(questionId);
+        if (q == null) throw new Exception("Question not found");
+
+        _context.Questions.Remove(q);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<ExamResultDto>> GetResultsAsync()
+    {
+        return await _context.StudentExams
+            .Include(se => se.Student)
+            .Include(se => se.Exam)
+            .Where(se => se.Status == "completed")
+            .Select(se => new ExamResultDto(
+                se.Id,
+                se.Student.Username, // Assuming username is the name for now
+                se.Exam.Title,
+                se.Score ?? 0,
+                se.EndTime ?? DateTime.UtcNow
+            ))
+            .OrderByDescending(r => r.CompletedAt)
+            .ToListAsync();
     }
 
     private string GenerateRandomPassword(int length = 10)

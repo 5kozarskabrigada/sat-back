@@ -18,6 +18,35 @@ public class AdminController : ControllerBase
         _adminService = adminService;
     }
 
+    [HttpGet("students")]
+    public async Task<IActionResult> GetStudents()
+    {
+        var students = await _adminService.GetStudentsAsync();
+        return Ok(students);
+    }
+
+    [HttpGet("exams")]
+    public async Task<IActionResult> GetExams()
+    {
+        var exams = await _adminService.GetExamsAsync();
+        return Ok(exams);
+    }
+
+    [HttpGet("exams/{examId}")]
+    public async Task<IActionResult> GetExamDetails(Guid examId)
+    {
+        var exam = await _adminService.GetExamDetailsAsync(examId);
+        if (exam == null) return NotFound();
+        return Ok(exam);
+    }
+
+    [HttpGet("results")]
+    public async Task<IActionResult> GetResults()
+    {
+        var results = await _adminService.GetResultsAsync();
+        return Ok(results);
+    }
+
     [HttpPost("create-students")]
     public async Task<IActionResult> CreateStudents([FromBody] List<CreateStudentRequest> requests)
     {
@@ -36,12 +65,68 @@ public class AdminController : ControllerBase
         return Ok(exam);
     }
 
+    [HttpPut("exams/{examId}")]
+    public async Task<IActionResult> UpdateExam(Guid examId, [FromBody] UpdateExamRequest request)
+    {
+        try
+        {
+            await _adminService.UpdateExamAsync(examId, request);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpDelete("exams/{examId}")]
+    public async Task<IActionResult> DeleteExam(Guid examId)
+    {
+        try
+        {
+            await _adminService.DeleteExamAsync(examId);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpPost("exams/{examId}/questions")]
     public async Task<IActionResult> AddQuestions(Guid examId, [FromBody] List<CreateQuestionRequest> questions)
     {
         try
         {
             await _adminService.AddQuestionsAsync(examId, questions);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPut("questions/{questionId}")]
+    public async Task<IActionResult> UpdateQuestion(Guid questionId, [FromBody] UpdateQuestionRequest request)
+    {
+        try
+        {
+            await _adminService.UpdateQuestionAsync(questionId, request);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpDelete("questions/{questionId}")]
+    public async Task<IActionResult> DeleteQuestion(Guid questionId)
+    {
+        try
+        {
+            await _adminService.DeleteQuestionAsync(questionId);
             return Ok();
         }
         catch (Exception ex)
