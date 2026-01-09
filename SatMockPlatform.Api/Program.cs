@@ -5,6 +5,9 @@ using Microsoft.OpenApi.Models;
 using SatMockPlatform.Api.Data;
 using System.Text;
 
+// Disable configuration reload on change to prevent "inotify limit reached" crash on Render
+Environment.SetEnvironmentVariable("DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE", "false");
+
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
     Args = args,
