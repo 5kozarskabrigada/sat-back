@@ -1,0 +1,6 @@
+@SatMockPlatform.Api_HostAddress = http://localhost:5184
+
+GET {{SatMockPlatform.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
