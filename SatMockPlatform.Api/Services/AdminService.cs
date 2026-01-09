@@ -129,6 +129,45 @@ public class AdminService
         return new AdminExamDetailsDto(exam.Id, exam.Code, exam.Title, questionDtos);
     }
 
+    public async Task<ExamStructureDto?> GetExamStructureAsync(Guid examId)
+    {
+        var exam = await _context.Exams.AsNoTracking().FirstOrDefaultAsync(e => e.Id == examId);
+        if (exam == null) return null;
+
+        // Fetch only essential columns for the structure, avoid fetching heavy JSON
+        var questions = await _context.Questions
+            .AsNoTracking()
+            .Where(q => q.ExamId == examId)
+            .Select(q => new { q.Id, q.Section, q.Module, q.QuestionText })
+            .ToListAsync();
+
+        var questionSummaries = questions.Select(q => new QuestionSummaryDto(
+            q.Id,
+            q.Section,
+            q.Module,
+            q.QuestionText.Length > 50 ? q.QuestionText.Substring(0, 50) + "..." : q.QuestionText
+        )).ToList();
+
+        return new ExamStructureDto(exam.Id, exam.Code, exam.Title, questionSummaries);
+    }
+
+    public async Task<AdminQuestionDto?> GetQuestionAsync(Guid questionId)
+    {
+        var q = await _context.Questions.AsNoTracking().FirstOrDefaultAsync(x => x.Id == questionId);
+        if (q == null) return null;
+
+        return new AdminQuestionDto(
+            q.Id,
+            q.Section,
+            q.Module,
+            q.QuestionText,
+            JsonSerializer.Deserialize<List<string>>(q.ChoicesJson) ?? new List<string>(),
+            q.CorrectAnswer,
+            q.Explanation,
+            q.Difficulty
+        );
+    }
+
     public async Task<Exam> CreateExamAsync(CreateExamRequest request, Guid adminId)
     {
         var exam = new Exam

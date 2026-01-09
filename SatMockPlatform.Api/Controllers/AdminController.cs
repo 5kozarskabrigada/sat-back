@@ -40,6 +40,22 @@ public class AdminController : ControllerBase
         return Ok(exam);
     }
 
+    [HttpGet("exams/{examId}/structure")]
+    public async Task<IActionResult> GetExamStructure(Guid examId)
+    {
+        var exam = await _adminService.GetExamStructureAsync(examId);
+        if (exam == null) return NotFound();
+        return Ok(exam);
+    }
+
+    [HttpGet("questions/{questionId}")]
+    public async Task<IActionResult> GetQuestion(Guid questionId)
+    {
+        var q = await _adminService.GetQuestionAsync(questionId);
+        if (q == null) return NotFound();
+        return Ok(q);
+    }
+
     [HttpGet("results")]
     public async Task<IActionResult> GetResults()
     {

@@ -48,3 +48,17 @@ public record ExamResultDto(
     int Score,
     DateTime CompletedAt
 );
+
+public record ExamStructureDto(
+    Guid Id,
+    string Code,
+    string Title,
+    List<QuestionSummaryDto> Questions
+);
+
+public record QuestionSummaryDto(
+    Guid Id,
+    string Section,
+    int Module,
+    string QuestionTextSnippet
+);
