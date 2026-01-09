@@ -17,13 +17,6 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Map entities to lowercase table names to match Supabase/Postgres conventions
-        modelBuilder.Entity<User>().ToTable("users");
-        modelBuilder.Entity<Exam>().ToTable("exams");
-        modelBuilder.Entity<Question>().ToTable("questions");
-        modelBuilder.Entity<StudentExam>().ToTable("student_exams");
-        modelBuilder.Entity<Response>().ToTable("responses");
-
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Username)
             .IsUnique();
