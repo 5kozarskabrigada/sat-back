@@ -16,7 +16,9 @@ public class AdminController : ControllerBase
     public AdminController(AdminService adminService)
     {
         _adminService = adminService;
-        [HttpPost("exams/{examId}/assign")]
+    }
+
+    [HttpPost("exams/{examId}/assign")]
     public async Task<IActionResult> AssignExam(Guid examId, [FromBody] List<Guid> studentIds)
     {
         try { await _adminService.AssignExamToStudentsAsync(examId, studentIds); return Ok(); }
