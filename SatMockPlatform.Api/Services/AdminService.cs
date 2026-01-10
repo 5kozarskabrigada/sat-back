@@ -124,7 +124,9 @@ public class AdminService
             JsonSerializer.Deserialize<List<string>>(q.ChoicesJson) ?? new List<string>(),
             q.CorrectAnswer,
             q.Explanation,
-            q.Difficulty
+            q.Difficulty,
+            q.Domain,
+            q.Skill
         )).ToList();
 
         return new AdminExamDetailsDto(exam.Id, exam.Code, exam.Title, questionDtos);
@@ -139,7 +141,7 @@ public class AdminService
         var questions = await _context.Questions
             .AsNoTracking()
             .Where(q => q.ExamId == examId)
-            .Select(q => new { q.Id, q.Section, q.Module, q.QuestionText, q.ChoicesJson, q.CorrectAnswer, q.Explanation, q.Difficulty })
+            .Select(q => new { q.Id, q.Section, q.Module, q.QuestionText, q.ChoicesJson, q.CorrectAnswer, q.Explanation, q.Difficulty, q.Domain, q.Skill })
             .ToListAsync();
 
         var questionDtos = questions.Select(q => new AdminQuestionDto(
@@ -150,7 +152,9 @@ public class AdminService
             JsonSerializer.Deserialize<List<string>>(q.ChoicesJson) ?? new List<string>(),
             q.CorrectAnswer,
             q.Explanation,
-            q.Difficulty
+            q.Difficulty,
+            q.Domain,
+            q.Skill
         )).ToList();
 
         return new ExamStructureDto(
@@ -174,7 +178,9 @@ public class AdminService
             JsonSerializer.Deserialize<List<string>>(q.ChoicesJson) ?? new List<string>(),
             q.CorrectAnswer,
             q.Explanation,
-            q.Difficulty
+            q.Difficulty,
+            q.Domain,
+            q.Skill
         );
     }
 
@@ -225,7 +231,9 @@ public class AdminService
             ChoicesJson = JsonSerializer.Serialize(q.Choices),
             CorrectAnswer = q.CorrectAnswer,
             Explanation = q.Explanation,
-            Difficulty = q.Difficulty
+            Difficulty = q.Difficulty,
+            Domain = q.Domain,
+            Skill = q.Skill
         }).ToList();
 
         _context.Questions.AddRange(questionEntities);

@@ -18,7 +18,9 @@ public record AdminQuestionDto(
     List<string> Choices, 
     string CorrectAnswer,
     string? Explanation,
-    string? Difficulty
+    string? Difficulty,
+    string? Domain,
+    string? Skill
 );
 
 public record CreateQuestionRequest(
@@ -28,7 +30,9 @@ public record CreateQuestionRequest(
     List<string> Choices, 
     string CorrectAnswer,
     string? Explanation,
-    string? Difficulty
+    string? Difficulty,
+    string? Domain,
+    string? Skill
 );
 
 public record UpdateQuestionRequest(
@@ -38,7 +42,9 @@ public record UpdateQuestionRequest(
     List<string> Choices, 
     string CorrectAnswer,
     string? Explanation,
-    string? Difficulty
+    string? Difficulty,
+    string? Domain,
+    string? Skill
 );
 
 public record ExamResultDto(

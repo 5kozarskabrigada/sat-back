@@ -20,6 +20,12 @@ public class Question
 
     [Column("QuestionText")]
     public string QuestionText { get; set; } = string.Empty;
+
+    [Column("Domain")]
+    public string? Domain { get; set; }
+
+    [Column("Skill")]
+    public string? Skill { get; set; }
     
     [Column("ChoicesJson", TypeName = "jsonb")]
     public string ChoicesJson { get; set; } = "[]"; // Serialized JSON
