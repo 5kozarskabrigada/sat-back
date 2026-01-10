@@ -142,14 +142,23 @@ public class AdminService
             .Select(q => new { q.Id, q.Section, q.Module, q.QuestionText })
             .ToListAsync();
 
-        var questionSummaries = questions.Select(q => new QuestionSummaryDto(
+        var questionDtos = questions.Select(q => new AdminQuestionDto(
             q.Id,
             q.Section,
             q.Module,
-            q.QuestionText.Length > 50 ? q.QuestionText.Substring(0, 50) + "..." : q.QuestionText
+            q.QuestionText,
+            JsonSerializer.Deserialize<List<string>>(q.ChoicesJson) ?? new List<string>(),
+            q.CorrectAnswer,
+            q.Explanation,
+            q.Difficulty
         )).ToList();
 
-        return new ExamStructureDto(exam.Id, exam.Code, exam.Title, questionSummaries);
+        return new ExamStructureDto(
+            exam.Id,
+            exam.Code,
+            exam.Title,
+            questionDtos
+        );
     }
 
     public async Task<AdminQuestionDto?> GetQuestionAsync(Guid questionId)
