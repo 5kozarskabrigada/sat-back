@@ -5,10 +5,15 @@ public record UpdateStudentRequest(string FirstName, string LastName);
 public record StudentCredential(string Username, string Password);
 public record StudentDto(Guid Id, string FirstName, string LastName, string Username, string Password, string Role, DateTime CreatedAt);
 
-public record CreateExamRequest(string Code, string Title);
-public record UpdateExamRequest(string Code, string Title);
-public record ExamDto(Guid Id, string Code, string Title, DateTime CreatedAt);
-public record AdminExamDetailsDto(Guid Id, string Code, string Title, List<AdminQuestionDto> Questions);
+public record CreateClassroomRequest(string Name);
+public record UpdateClassroomRequest(string Name);
+public record ClassroomDto(Guid Id, string Name, DateTime CreatedAt, int StudentCount);
+public record ClassroomDetailDto(Guid Id, string Name, DateTime CreatedAt, List<StudentDto> Students);
+
+public record CreateExamRequest(string Code, string Title, string Type = "mock");
+public record UpdateExamRequest(string Code, string Title, string Status);
+public record ExamDto(Guid Id, string Code, string Title, string Type, string Status, DateTime CreatedAt);
+public record AdminExamDetailsDto(Guid Id, string Code, string Title, string Type, string Status, List<AdminQuestionDto> Questions);
 
 public record AdminQuestionDto(
     Guid Id, 

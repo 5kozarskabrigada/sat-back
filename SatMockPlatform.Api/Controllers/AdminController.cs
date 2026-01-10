@@ -204,4 +204,63 @@ public class AdminController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    // --- CLASSROOM ENDPOINTS ---
+
+    [HttpGet("classrooms")]
+    public async Task<IActionResult> GetClassrooms()
+    {
+        var classrooms = await _adminService.GetClassroomsAsync();
+        return Ok(classrooms);
+    }
+
+    [HttpPost("classrooms")]
+    public async Task<IActionResult> CreateClassroom([FromBody] CreateClassroomRequest request)
+    {
+        var classroom = await _adminService.CreateClassroomAsync(request);
+        return Ok(classroom);
+    }
+
+    [HttpGet("classrooms/{id}")]
+    public async Task<IActionResult> GetClassroom(Guid id)
+    {
+        var classroom = await _adminService.GetClassroomDetailsAsync(id);
+        if (classroom == null) return NotFound();
+        return Ok(classroom);
+    }
+
+    [HttpPut("classrooms/{id}")]
+    public async Task<IActionResult> UpdateClassroom(Guid id, [FromBody] UpdateClassroomRequest request)
+    {
+        try { await _adminService.UpdateClassroomAsync(id, request); return Ok(); }
+        catch (Exception ex) { return BadRequest(ex.Message); }
+    }
+
+    [HttpDelete("classrooms/{id}")]
+    public async Task<IActionResult> DeleteClassroom(Guid id)
+    {
+        try { await _adminService.DeleteClassroomAsync(id); return Ok(); }
+        catch (Exception ex) { return BadRequest(ex.Message); }
+    }
+
+    [HttpPost("classrooms/{id}/students")]
+    public async Task<IActionResult> AddStudentsToClassroom(Guid id, [FromBody] List<Guid> studentIds)
+    {
+        try { await _adminService.AddStudentsToClassroomAsync(id, studentIds); return Ok(); }
+        catch (Exception ex) { return BadRequest(ex.Message); }
+    }
+
+    [HttpDelete("classrooms/{id}/students/{studentId}")]
+    public async Task<IActionResult> RemoveStudentFromClassroom(Guid id, Guid studentId)
+    {
+        try { await _adminService.RemoveStudentFromClassroomAsync(id, studentId); return Ok(); }
+        catch (Exception ex) { return BadRequest(ex.Message); }
+    }
+
+    [HttpPost("exams/{examId}/assign-classroom/{classroomId}")]
+    public async Task<IActionResult> AssignExamToClassroom(Guid examId, Guid classroomId)
+    {
+        try { await _adminService.AssignExamToClassroomAsync(examId, classroomId); return Ok(); }
+        catch (Exception ex) { return BadRequest(ex.Message); }
+    }
 }

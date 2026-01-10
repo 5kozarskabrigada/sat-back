@@ -18,11 +18,19 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var result = await _authService.LoginAsync(request);
-        if (result == null)
+        try 
         {
-            return Unauthorized("Invalid credentials");
+            var result = await _authService.LoginAsync(request);
+            if (result == null)
+            {
+                return Unauthorized("Invalid credentials");
+            }
+            return Ok(result);
         }
-        return Ok(result);
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Login failed: {ex}");
+            return StatusCode(500, new { error = ex.Message });
+        }
     }
 }

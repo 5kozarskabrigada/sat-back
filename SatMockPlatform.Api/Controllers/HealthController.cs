@@ -16,6 +16,7 @@ public class HealthController : ControllerBase
     }
 
     [HttpGet]
+    [HttpHead]
     public async Task<IActionResult> Get()
     {
         // "Deep Warm-up": Force EF Core initialization and open DB connection

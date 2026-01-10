@@ -14,6 +14,8 @@ public class Exam
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
     public bool IsRestricted { get; set; } = false; // If true, only assigned students can access
+    public string Type { get; set; } = "mock"; // 'mock' or 'practice'
+    public string Status { get; set; } = "draft"; // 'draft', 'live', 'archived'
     
     public ICollection<Question> Questions { get; set; } = new List<Question>();
     public ICollection<ExamAssignment> Assignments { get; set; } = new List<ExamAssignment>();

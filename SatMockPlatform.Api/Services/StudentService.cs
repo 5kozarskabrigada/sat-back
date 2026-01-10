@@ -21,9 +21,10 @@ public class StudentService
         // Filter logic:
         // 1. If IsRestricted == false -> Public to all
         // 2. If IsRestricted == true -> Must have an assignment for this student
+        // 3. Status must be "live" (or maybe "practice" ones are always available? Let's assume only "live" for now based on strict control)
         
         var availableExamIds = await _context.Exams
-            .Where(e => e.IsActive)
+            .Where(e => e.IsActive && e.Status == "live")
             .Select(e => new { e.Id, e.IsRestricted })
             .ToListAsync();
             
@@ -59,6 +60,21 @@ public class StudentService
 
     public async Task<StartExamResponse> StartExamAsync(Guid studentId, Guid examId)
     {
+        // Verify exam is live
+        var examCheck = await _context.Exams.AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Id == examId);
+            
+        if (examCheck == null) throw new Exception("Exam not found");
+        if (!examCheck.IsActive || examCheck.Status != "live") throw new Exception("Exam is not currently live");
+
+        // If restricted, check assignment
+        if (examCheck.IsRestricted)
+        {
+            var isAssigned = await _context.ExamAssignments
+                .AnyAsync(ea => ea.ExamId == examId && ea.StudentId == studentId);
+            if (!isAssigned) throw new Exception("You are not assigned to this exam");
+        }
+
         var attempt = await _context.StudentExams
             .FirstOrDefaultAsync(se => se.StudentId == studentId && se.ExamId == examId);
 

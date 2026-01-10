@@ -24,6 +24,13 @@ public class AuthService
     {
         var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == request.Username);
         
+        Console.WriteLine($"[DEBUG] Login Attempt: User='{request.Username}' Found={(user != null)}");
+        if (user != null)
+        {
+             var verify = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+             Console.WriteLine($"[DEBUG] Hash Verify: '{request.Password}' vs '{user.PasswordHash}' => {verify}");
+        }
+
         // Note: In a real app, use a proper hashing mechanism validation.
         // Assuming BCrypt hash is stored.
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))

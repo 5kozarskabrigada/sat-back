@@ -102,7 +102,7 @@ public class AdminService
     {
         return await _context.Exams
             .AsNoTracking()
-            .Select(e => new ExamDto(e.Id, e.Code, e.Title, e.CreatedAt))
+            .Select(e => new ExamDto(e.Id, e.Code, e.Title, e.Type, e.Status, e.CreatedAt))
             .ToListAsync();
     }
 
@@ -129,7 +129,7 @@ public class AdminService
             q.Skill
         )).ToList();
 
-        return new AdminExamDetailsDto(exam.Id, exam.Code, exam.Title, questionDtos);
+        return new AdminExamDetailsDto(exam.Id, exam.Code, exam.Title, exam.Type, exam.Status, questionDtos);
     }
 
     public async Task<ExamStructureDto?> GetExamStructureAsync(Guid examId)
@@ -190,6 +190,8 @@ public class AdminService
         {
             Code = request.Code,
             Title = request.Title,
+            Type = request.Type,
+            Status = "draft",
             CreatedBy = adminId
         };
 
@@ -205,6 +207,7 @@ public class AdminService
 
         exam.Code = request.Code;
         exam.Title = request.Title;
+        exam.Status = request.Status;
         await _context.SaveChangesAsync();
     }
 
@@ -327,6 +330,118 @@ public class AdminService
         if (exam == null) throw new Exception("Exam not found");
         exam.IsRestricted = isRestricted;
         await _context.SaveChangesAsync();
+    }
+
+    // --- CLASSROOMS ---
+
+    public async Task<List<ClassroomDto>> GetClassroomsAsync()
+    {
+        return await _context.Classrooms
+            .AsNoTracking()
+            .Select(c => new ClassroomDto(
+                c.Id, 
+                c.Name, 
+                c.CreatedAt, 
+                c.ClassroomStudents.Count
+            ))
+            .ToListAsync();
+    }
+
+    public async Task<Classroom> CreateClassroomAsync(CreateClassroomRequest request)
+    {
+        var classroom = new Classroom { Name = request.Name };
+        _context.Classrooms.Add(classroom);
+        await _context.SaveChangesAsync();
+        return classroom;
+    }
+
+    public async Task<ClassroomDetailDto?> GetClassroomDetailsAsync(Guid id)
+    {
+        var classroom = await _context.Classrooms
+            .AsNoTracking()
+            .Include(c => c.ClassroomStudents)
+            .ThenInclude(cs => cs.Student)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (classroom == null) return null;
+
+        var students = classroom.ClassroomStudents
+            .Where(cs => cs.Student != null)
+            .Select(cs => new StudentDto(
+                cs.Student!.Id, 
+                cs.Student.FirstName, 
+                cs.Student.LastName, 
+                cs.Student.Username, 
+                cs.Student.PlainPassword, 
+                cs.Student.Role, 
+                cs.Student.CreatedAt
+            ))
+            .ToList();
+
+        return new ClassroomDetailDto(classroom.Id, classroom.Name, classroom.CreatedAt, students);
+    }
+
+    public async Task UpdateClassroomAsync(Guid id, UpdateClassroomRequest request)
+    {
+        var classroom = await _context.Classrooms.FindAsync(id);
+        if (classroom == null) throw new Exception("Classroom not found");
+        classroom.Name = request.Name;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteClassroomAsync(Guid id)
+    {
+        var classroom = await _context.Classrooms.FindAsync(id);
+        if (classroom == null) throw new Exception("Classroom not found");
+        _context.Classrooms.Remove(classroom);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task AddStudentsToClassroomAsync(Guid classroomId, List<Guid> studentIds)
+    {
+        var classroom = await _context.Classrooms.FindAsync(classroomId);
+        if (classroom == null) throw new Exception("Classroom not found");
+
+        var existingIds = await _context.ClassroomStudents
+            .Where(cs => cs.ClassroomId == classroomId)
+            .Select(cs => cs.StudentId)
+            .ToListAsync();
+        
+        var existingSet = new HashSet<Guid>(existingIds);
+
+        var newStudents = studentIds
+            .Where(sid => !existingSet.Contains(sid))
+            .Select(sid => new ClassroomStudent { ClassroomId = classroomId, StudentId = sid })
+            .ToList();
+
+        if (newStudents.Any())
+        {
+            _context.ClassroomStudents.AddRange(newStudents);
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task RemoveStudentFromClassroomAsync(Guid classroomId, Guid studentId)
+    {
+        var cs = await _context.ClassroomStudents.FindAsync(classroomId, studentId);
+        if (cs != null)
+        {
+            _context.ClassroomStudents.Remove(cs);
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task AssignExamToClassroomAsync(Guid examId, Guid classroomId)
+    {
+        var studentIds = await _context.ClassroomStudents
+            .Where(cs => cs.ClassroomId == classroomId)
+            .Select(cs => cs.StudentId)
+            .ToListAsync();
+
+        if (studentIds.Any())
+        {
+            await AssignExamToStudentsAsync(examId, studentIds);
+        }
     }
 
     private string GenerateRandomPassword(int length = 10)
