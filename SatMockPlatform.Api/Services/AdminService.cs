@@ -269,19 +269,16 @@ public class AdminService
     {
         return await _context.StudentExams
             .AsNoTracking()
-            .Include(se => se.Student)
-            .Include(se => se.Exam)
             .Where(se => se.Status == "completed")
-            // Explicit null checks to prevent NullReferenceException if data is inconsistent
             .Where(se => se.Student != null && se.Exam != null) 
+            .OrderByDescending(se => se.EndTime) // Order by entity property before projection
             .Select(se => new ExamResultDto(
                 se.Id,
-                se.Student.Username, 
-                se.Exam.Title,
+                se.Student!.Username, 
+                se.Exam!.Title,
                 se.Score ?? 0,
                 se.EndTime ?? DateTime.UtcNow
             ))
-            .OrderByDescending(r => r.CompletedAt)
             .ToListAsync();
     }
 
