@@ -20,6 +20,19 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // USE SNAKE CASE CONVENTION GLOBALLY
+        foreach(var entity in modelBuilder.Model.GetEntityTypes())
+        {
+            // Replace Table Names
+            entity.SetTableName(entity.GetTableName()!.ToLower());
+
+            // Replace Column Names
+            foreach(var property in entity.GetProperties())
+            {
+                property.SetColumnName(ToSnakeCase(property.Name));
+            }
+        }
+
         // Map User to "users" table explicitly
         modelBuilder.Entity<User>().ToTable("users");
 
@@ -28,16 +41,6 @@ public class ApplicationDbContext : DbContext
             entity.HasIndex(u => u.Username).IsUnique();
             entity.HasIndex(u => u.Role);
             entity.Property(u => u.Id).HasDefaultValueSql("gen_random_uuid()");
-            
-            // Map properties to snake_case columns
-            entity.Property(u => u.Id).HasColumnName("id");
-            entity.Property(u => u.Username).HasColumnName("username");
-            entity.Property(u => u.PasswordHash).HasColumnName("password_hash");
-            entity.Property(u => u.Role).HasColumnName("role");
-            entity.Property(u => u.FirstName).HasColumnName("first_name");
-            entity.Property(u => u.LastName).HasColumnName("last_name");
-            entity.Property(u => u.PlainPassword).HasColumnName("plain_password");
-            entity.Property(u => u.CreatedAt).HasColumnName("created_at");
         });
         
         // Map other entities to snake_case tables
@@ -102,5 +105,10 @@ public class ApplicationDbContext : DbContext
                 .WithMany(u => u.ExamAssignments)
                 .HasForeignKey(ea => ea.StudentId);
         });
+    }
+
+    private string ToSnakeCase(string str)
+    {
+        return string.Concat(str.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x.ToString() : x.ToString())).ToLower();
     }
 }
