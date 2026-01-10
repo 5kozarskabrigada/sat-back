@@ -139,7 +139,7 @@ public class AdminService
         var questions = await _context.Questions
             .AsNoTracking()
             .Where(q => q.ExamId == examId)
-            .Select(q => new { q.Id, q.Section, q.Module, q.QuestionText })
+            .Select(q => new { q.Id, q.Section, q.Module, q.QuestionText, q.ChoicesJson, q.CorrectAnswer, q.Explanation, q.Difficulty })
             .ToListAsync();
 
         var questionDtos = questions.Select(q => new AdminQuestionDto(
